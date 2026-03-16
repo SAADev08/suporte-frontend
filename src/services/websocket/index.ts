@@ -20,7 +20,15 @@ class WebSocketService {
                 onConnected?.();
             },
             onDisconnect: () => console.log("[WS] Desconectado"),
-            onStompError: frame => console.error("[WS] Erro:", frame),
+            onStompError: frame => {
+                console.error("[WS] Erro:", frame);
+                if (
+                    frame.headers?.message?.includes("JWT") ||
+                    frame.headers?.message?.includes("autenticação")
+                ) {
+                    // ex: router.push('/login') ou dispatch(logout())
+                }
+            },
         });
         this.client.activate();
     }
