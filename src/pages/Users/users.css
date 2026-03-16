@@ -1,0 +1,202 @@
+/* ─── Acesso negado ──────────────────────────────────────────────────────────*/
+.acesso-negado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 320px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.acesso-negado-icon {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.acesso-negado h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.acesso-negado p {
+    font-size: 14px;
+}
+
+/* ─── Célula nome com avatar ─────────────────────────────────────────────────*/
+.usuario-nome-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.usuario-avatar-mini {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--brand-mid);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.badge-eu {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    background: rgba(26, 107, 60, 0.1);
+    border: 1px solid rgba(26, 107, 60, 0.25);
+    color: var(--brand-mid);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+/* ─── Badge de perfil ────────────────────────────────────────────────────────*/
+.badge-perfil {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-perfil-gestor {
+    background: rgba(146, 64, 14, 0.08);
+    color: #92400e;
+    border: 1px solid rgba(146, 64, 14, 0.2);
+}
+
+.badge-perfil-analista {
+    background: rgba(26, 107, 60, 0.08);
+    color: var(--brand-mid);
+    border: 1px solid rgba(26, 107, 60, 0.2);
+}
+
+/* ─── Botão reativar ─────────────────────────────────────────────────────────*/
+.btn-acao-reativar:hover {
+    background: rgba(39, 174, 96, 0.1);
+}
+
+.btn-acao:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ─── Input senha com toggle ─────────────────────────────────────────────────*/
+.input-senha-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-senha-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+    padding: 9px 40px 9px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    color: var(--color-text);
+    outline: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+.input-senha-wrapper input:focus {
+    border-color: var(--brand-mid);
+    box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12);
+}
+
+.input-senha-wrapper input.input-erro {
+    border-color: var(--color-danger) !important;
+}
+
+.btn-toggle-senha {
+    position: absolute;
+    right: 10px;
+    font-size: 16px;
+    color: var(--color-text-muted);
+    padding: 2px;
+    border-radius: 4px;
+    transition: color 0.15s;
+    line-height: 1;
+}
+
+.btn-toggle-senha:hover {
+    color: var(--color-text);
+}
+
+/* ─── Avatar grande no detalhe ───────────────────────────────────────────────*/
+.usuario-detalhe-avatar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--brand-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+}
+
+.usuario-avatar-grande {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--brand-mid);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    flex-shrink: 0;
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 8px rgba(15, 71, 43, 0.2);
+}
+
+.usuario-detalhe-nome {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
+/* ─── Responsivo ─────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    /* Avatar de detalhe: empilha verticalmente em telas muito pequenas */
+    .usuario-detalhe-avatar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Badge de perfil na célula de nome */
+    .badge-perfil {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+
+    /* Célula nome + avatar: evita overflow */
+    .usuario-nome-cell {
+        gap: 6px;
+    }
+
+    .usuario-avatar-mini {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+}

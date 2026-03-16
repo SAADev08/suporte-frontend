@@ -1,0 +1,157 @@
+/* ─── Chips de clientes (tabela e detalhe) ───────────────────────────────────*/
+.clientes-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    background: var(--brand-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--brand-dark);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.chip-mais {
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.chip-lg {
+    padding: 5px 12px;
+    font-size: 13px;
+}
+
+.chip-removivel {
+    padding-right: 6px;
+    background: rgba(26, 107, 60, 0.08);
+    border-color: rgba(26, 107, 60, 0.25);
+}
+
+.chip-removivel button {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    padding: 0 2px;
+    border-radius: 50%;
+    line-height: 1;
+    transition:
+        color 0.15s,
+        background 0.15s;
+}
+
+.chip-removivel button:hover {
+    color: var(--color-danger);
+    background: rgba(192, 57, 43, 0.1);
+}
+
+/* ─── Modal largo ─────────────────────────────────────────────────────────── */
+.modal-lg {
+    max-width: 640px;
+}
+
+/* ─── Select box de clientes ─────────────────────────────────────────────── */
+.clientes-select-box {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    overflow: hidden;
+}
+
+.clientes-select-search {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+}
+
+.clientes-select-search input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 13px;
+    color: var(--color-text);
+}
+
+.clientes-select-list {
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.clientes-select-vazio {
+    padding: 16px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.cliente-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: background 0.12s;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.cliente-option:last-child {
+    border-bottom: none;
+}
+
+.cliente-option:hover {
+    background: var(--brand-bg);
+}
+
+.cliente-option.selecionado {
+    background: rgba(26, 107, 60, 0.06);
+}
+
+.cliente-option input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--brand-mid);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.cliente-option-nome {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.cliente-option-cidade {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+/* ─── Responsivo ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Select de clientes: lista um pouco maior no bottom sheet */
+    .clientes-select-list {
+        max-height: 220px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Chips dos clientes selecionados: fontes menores */
+    .chip-lg {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+
+    /* Select box ocupa toda a largura */
+    .clientes-select-box {
+        width: 100%;
+    }
+}

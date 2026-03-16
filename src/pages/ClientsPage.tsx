@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
-import type { Cliente } from "../types";
+import type { Cliente, PageResponse } from "../types";
 import { clienteApi, type ClienteRequest } from "../services/api/clientApi";
 import {
     formatarCpfCnpj,
@@ -8,6 +8,7 @@ import {
     validarCpfCnpj,
     formatarData,
 } from "../utils/formatters";
+import { Pagination, type TamanhoPagina } from "../components/Pagination";
 
 // ─── Estado inicial do formulário ─────────────────────────────────────────────
 const FORM_VAZIO: ClienteRequest = {
@@ -20,7 +21,9 @@ const FORM_VAZIO: ClienteRequest = {
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export function ClientsPage() {
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [pageData, setPageData] = useState<PageResponse<Cliente> | null>(
+        null,
+    );
     const [loading, setLoading] = useState(true);
     const [busca, setBusca] = useState({ nome: "", cidade: "", cpfCnpj: "" });
     const [modal, setModal] = useState<"criar" | "editar" | "detalhe" | null>(
@@ -34,6 +37,9 @@ export function ClientsPage() {
         null,
     );
 
+    const [page, setPage] = useState(0);
+    const [size, setSize] = useState<TamanhoPagina>(10);
+
     // ─── Carregar lista ─────────────────────────────────────────────────────────
     const carregar = useCallback(async () => {
         setLoading(true);
@@ -42,15 +48,17 @@ export function ClientsPage() {
                 nome: busca.nome || undefined,
                 cidade: busca.cidade || undefined,
                 cpfCnpj: apenasNumeros(busca.cpfCnpj) || undefined,
+                page,
+                size,
             };
             const { data } = await clienteApi.listar(params);
-            setClientes(data);
+            setPageData(data);
         } catch {
             toast.error("Erro ao carregar clientes");
         } finally {
             setLoading(false);
         }
-    }, [busca]);
+    }, [busca, page, size]);
 
     useEffect(() => {
         carregar();
@@ -210,7 +218,7 @@ export function ClientsPage() {
             <div className="tabela-wrapper">
                 {loading ? (
                     <div className="estado-vazio">Carregando...</div>
-                ) : clientes.length === 0 ? (
+                ) : !pageData || pageData.content.length === 0 ? (
                     <div className="estado-vazio">
                         <p>Nenhum cliente encontrado.</p>
                         <button className="btn-primary" onClick={abrirCriar}>
@@ -218,69 +226,97 @@ export function ClientsPage() {
                         </button>
                     </div>
                 ) : (
-                    <table className="tabela">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>CPF/CNPJ</th>
-                                <th>Cidade</th>
-                                <th>Contato Principal</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {clientes.map(c => (
-                                <tr
-                                    key={c.id}
-                                    className={!c.ativo ? "linha-inativa" : ""}
-                                >
-                                    <td>
-                                        <button
-                                            className="link-tabela"
-                                            onClick={() => abrirDetalhe(c)}
-                                        >
-                                            {c.nome}
-                                        </button>
-                                    </td>
-                                    <td className="texto-mono">
-                                        {formatarCpfCnpj(c.cpfCnpj)}
-                                    </td>
-                                    <td>{c.cidade || "—"}</td>
-                                    <td>{c.contatoPrincipal || "—"}</td>
-                                    <td>
-                                        <span
-                                            className={`badge ${c.ativo ? "badge-ativo" : "badge-inativo"}`}
-                                        >
-                                            {c.ativo ? "Ativo" : "Inativo"}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="acoes-tabela">
-                                            <button
-                                                className="btn-acao btn-acao-editar"
-                                                onClick={() => abrirEditar(c)}
-                                                title="Editar"
-                                            >
-                                                ✏️
-                                            </button>
-                                            {c.ativo && (
-                                                <button
-                                                    className="btn-acao btn-acao-inativar"
-                                                    onClick={() =>
-                                                        setConfirmInativar(c)
-                                                    }
-                                                    title="Inativar"
-                                                >
-                                                    🚫
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
+                    <>
+                        <table className="tabela tabela-6col">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>CPF/CNPJ</th>
+                                    <th className="tabela-col-ocultar-mobile">
+                                        Cidade
+                                    </th>
+                                    <th className="tabela-col-ocultar-mobile">
+                                        Contato Principal
+                                    </th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {pageData.content.map(c => (
+                                    <tr
+                                        key={c.id}
+                                        className={
+                                            !c.ativo ? "linha-inativa" : ""
+                                        }
+                                    >
+                                        <td>
+                                            <button
+                                                className="link-tabela"
+                                                onClick={() => abrirDetalhe(c)}
+                                            >
+                                                {c.nome}
+                                            </button>
+                                        </td>
+                                        <td className="texto-mono">
+                                            {formatarCpfCnpj(c.cpfCnpj)}
+                                        </td>
+                                        <td className="tabela-col-ocultar-mobile">
+                                            {c.cidade || "—"}
+                                        </td>
+                                        <td className="tabela-col-ocultar-mobile">
+                                            {c.contatoPrincipal || "—"}
+                                        </td>
+                                        <td>
+                                            <span
+                                                className={`badge ${c.ativo ? "badge-ativo" : "badge-inativo"}`}
+                                            >
+                                                {c.ativo ? "Ativo" : "Inativo"}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="acoes-tabela">
+                                                <button
+                                                    className="btn-acao btn-acao-editar"
+                                                    onClick={() =>
+                                                        abrirEditar(c)
+                                                    }
+                                                    title="Editar"
+                                                >
+                                                    ✏️
+                                                </button>
+                                                {c.ativo && (
+                                                    <button
+                                                        className="btn-acao btn-acao-inativar"
+                                                        onClick={() =>
+                                                            setConfirmInativar(
+                                                                c,
+                                                            )
+                                                        }
+                                                        title="Inativar"
+                                                    >
+                                                        🚫
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <Pagination
+                            page={pageData.number}
+                            totalPages={pageData.totalPages}
+                            totalElements={pageData.totalElements}
+                            size={pageData.size as TamanhoPagina}
+                            onPageChange={setPage}
+                            onSizeChange={s => {
+                                console.log("Tamanho página:", s);
+                                setSize(s);
+                                setPage(0);
+                            }}
+                        />
+                    </>
                 )}
             </div>
 

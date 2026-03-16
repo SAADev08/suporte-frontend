@@ -1,0 +1,250 @@
+/* ─── Cards de status ────────────────────────────────────────────────────────*/
+.chamados-status-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.status-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--card-border, var(--color-border));
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        box-shadow 0.15s,
+        transform 0.1s;
+    box-shadow: var(--shadow);
+}
+
+.status-card:hover {
+    background: var(--card-bg, var(--brand-bg));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.status-card.ativo {
+    background: var(--card-bg, var(--brand-bg));
+    border-color: var(--card-cor, var(--brand-mid));
+    box-shadow: 0 0 0 2px var(--card-border, var(--color-border));
+}
+
+.status-card-icone {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.status-card-count {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--card-cor, var(--color-text));
+    line-height: 1;
+}
+
+.status-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+/* ─── Badge de status inline ─────────────────────────────────────────────────*/
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ─── Origem / Categoria ─────────────────────────────────────────────────────*/
+.texto-origem,
+.texto-categoria {
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ─── Botão encerrar ─────────────────────────────────────────────────────────*/
+.btn-acao-encerrar:hover {
+    background: rgba(192, 57, 43, 0.1);
+}
+
+/* ─── Modal com abas ─────────────────────────────────────────────────────────*/
+.modal-lg {
+    max-width: 680px;
+}
+
+.chamado-abas {
+    display: flex;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 0 20px;
+}
+
+.chamado-aba {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition:
+        color 0.15s,
+        border-color 0.15s;
+}
+
+.chamado-aba:hover {
+    color: var(--color-text);
+}
+
+.chamado-aba.ativa {
+    color: var(--brand-mid);
+    border-bottom-color: var(--brand-mid);
+    font-weight: 600;
+}
+
+/* ─── Caixas de texto (descrição / solução) ──────────────────────────────────*/
+.chamado-texto-box {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.chamado-texto-box p {
+    font-size: 13.5px;
+    color: var(--color-text);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.chamado-solucao-box {
+    border-color: rgba(39, 174, 96, 0.3);
+    background: rgba(39, 174, 96, 0.05);
+}
+
+.chamado-solucao-box .detalhe-label {
+    color: #1a7a3a;
+}
+
+/* ─── Timeline de histórico ──────────────────────────────────────────────────*/
+.historico-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 20px;
+}
+
+.historico-lista::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--color-border);
+    border-radius: 2px;
+}
+
+.historico-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    position: relative;
+}
+
+.historico-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--color-surface);
+    box-shadow: 0 0 0 2px var(--color-border);
+    flex-shrink: 0;
+    margin-top: 3px;
+    margin-left: -20px;
+}
+
+.historico-conteudo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.historico-topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.historico-tempo {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: 1px 8px;
+    border-radius: 999px;
+}
+
+.historico-datas {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+/* ─── Responsividade ─────────────────────────────────────────────────────────*/
+@media (max-width: 768px) {
+    .chamados-status-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-lg {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .chamados-status-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .status-card-count {
+        font-size: 22px;
+    }
+
+    .chamado-abas {
+        padding: 0 14px;
+    }
+
+    .chamado-aba {
+        padding: 10px 10px;
+        font-size: 12px;
+    }
+
+    .historico-datas {
+        flex-direction: column;
+        gap: 2px;
+    }
+}
