@@ -1,98 +1,123 @@
 import { useNavigationStore } from "../store/navigationStore";
 import { useAuthStore } from "../store/authStore";
 import type { View } from "../types";
+import {
+    faHouse,
+    faCommentDots,
+    type IconDefinition,
+    faAddressBook,
+    faFolderClosed,
+} from "@fortawesome/free-regular-svg-icons";
+import {
+    faClipboardList,
+    faPeopleLine,
+    faUserGroup,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+interface SidebarProps {
+    open?: boolean;
+    onCloseSide?: () => void;
+}
 
 interface MenuItem {
     view: View;
     label: string;
-    icon: string;
+    icon: IconDefinition;
     apenasGestor?: boolean;
 }
 
 const MENU: { grupo: string; itens: MenuItem[] }[] = [
     {
-        grupo: "VISÃO GERAL",
-        itens: [{ view: "dashboard", label: "Dashboard", icon: "▦" }],
+        grupo: "Visão Geral",
+        itens: [{ view: "dashboard", label: "Home", icon: faHouse }],
     },
     {
-        grupo: "COMUNICAÇÃO",
+        grupo: "Comunicação",
         itens: [
-            { view: "chat", label: "Chat", icon: "💬" },
-            { view: "chamados", label: "Chamados", icon: "📋" },
+            { view: "chat", label: "Chat", icon: faCommentDots },
+            { view: "chamados", label: "Chamados", icon: faClipboardList },
         ],
     },
     {
-        grupo: "CADASTROS",
+        grupo: "Cadastros",
         itens: [
-            { view: "clientes", label: "Clientes", icon: "🏢" },
-            { view: "contatos", label: "Contatos", icon: "👤" },
-            { view: "tipos", label: "Tipos / Subtipos", icon: "🗂️" },
+            { view: "clientes", label: "Clientes", icon: faPeopleLine },
+            { view: "contatos", label: "Contatos", icon: faAddressBook },
+            { view: "tipos", label: "Tipos / Subtipos", icon: faFolderClosed },
             {
                 view: "usuarios",
                 label: "Usuários",
-                icon: "👥",
+                icon: faUserGroup,
                 apenasGestor: true,
             },
         ],
     },
 ];
 
-export function Sidebar() {
+export function Sidebar({ open = false, onCloseSide }: SidebarProps) {
     const { activeView, navigate } = useNavigationStore();
-    const { usuario, logout } = useAuthStore();
+    const { usuario } = useAuthStore();
 
     const podeVer = (item: MenuItem) => {
         if (item.apenasGestor && usuario?.perfil !== "GESTOR") return false;
         return true;
     };
 
+    const handleNavegar = (view: View) => {
+        navigate(view);
+        // Fecha o drawer ao navegar em mobile
+        onCloseSide?.();
+    };
+
     return (
-        <aside className="sidebar">
-            {/* Logo */}
-            <div className="sidebar-logo">
-                <span className="logo-icon">🎧</span>
-                <span className="logo-text">Suporte</span>
-            </div>
+        <>
+            {/* Overlay escuro — só visível em mobile quando drawer está aberto */}
 
-            {/* Menu */}
-            <nav className="sidebar-nav">
-                {MENU.map(grupo => (
-                    <div key={grupo.grupo} className="sidebar-grupo">
-                        <span className="sidebar-grupo-label">
-                            {grupo.grupo}
-                        </span>
-                        {grupo.itens.filter(podeVer).map(item => (
-                            <button
-                                key={item.view}
-                                className={`sidebar-item ${activeView === item.view ? "ativo" : ""}`}
-                                onClick={() => navigate(item.view)}
-                            >
-                                <span className="sidebar-item-icon">
-                                    {item.icon}
-                                </span>
-                                <span className="sidebar-item-label">
-                                    {item.label}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                ))}
-            </nav>
+            <div
+                className={`sidebar-overlay${open ? " visivel" : ""}`}
+                onClick={onCloseSide}
+                aria-hidden="true"
+            />
 
-            {/* Usuário */}
-            <div className="sidebar-footer">
-                <div className="sidebar-usuario">
-                    <div className="sidebar-avatar">
-                        {usuario?.nome?.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="sidebar-usuario-info">
-                        <span className="sidebar-usuario-nome">
-                            {usuario?.nome}
-                        </span>
-                        <span className="sidebar-usuario-perfil">
-                            {usuario?.perfil}
-                        </span>
-                    </div>
+            <aside className={`sidebar${open ? " aberta" : ""}`}>
+                {/* Navigation */}
+                <nav className="sidebar-nav">
+                    {MENU.map(grupo => (
+                        <div key={grupo.grupo} className="sidebar-grupo">
+                            <span className="sidebar-grupo-label">
+                                {grupo.grupo}
+                            </span>
+                            {grupo.itens.filter(podeVer).map(item => (
+                                <button
+                                    key={item.view}
+                                    className={`sidebar-item ${activeView === item.view ? "ativo" : ""}`}
+                                    onClick={() => handleNavegar(item.view)}
+                                >
+                                    <span className="sidebar-item-icon">
+                                        <FontAwesomeIcon icon={item.icon} />
+                                    </span>
+                                    <span className="sidebar-item-label">
+                                        {item.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    ))}
+                </nav>
+
+                {/* Footer / User */}
+                {/* <div className="sidebar-footer">
+                <div className="sidebar-avatar">
+                    {usuario?.nome?.charAt(0).toUpperCase()}
+                </div>
+                <div className="sidebar-usuario-info">
+                    <span className="sidebar-usuario-nome">
+                        {usuario?.nome}
+                    </span>
+                    <span className="sidebar-usuario-perfil">
+                        {usuario?.perfil}
+                    </span>
                 </div>
                 <button
                     className="sidebar-logout"
@@ -101,7 +126,8 @@ export function Sidebar() {
                 >
                     ⎋
                 </button>
-            </div>
-        </aside>
+            </div> */}
+            </aside>
+        </>
     );
 }

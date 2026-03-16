@@ -3,16 +3,48 @@ import { useNavigationStore } from "../store/navigationStore";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { DashboardPage } from "../pages/DashboardPage";
-import { ChatPage } from "../pages/ChatsPage";
-import { TicketsPage } from "../pages/TicketsPage";
+import { ChatPage } from "../pages/Chats/ChatsPage";
+import { TicketsPage } from "../pages/Tickets/TicketsPage";
 import { ClientsPage } from "../pages/ClientsPage";
-import { UsersPage } from "../pages/UsersPage";
-import { ContactsPage } from "../pages/ContactsPage";
-import { TypesPage } from "../pages/Types";
+import { UsersPage } from "../pages/Users/UsersPage";
+import { ContactsPage } from "../pages/Contacts/ContactsPage";
+import { TypesPage } from "../pages/Types/Types";
+import { useCallback, useEffect, useState } from "react";
+
+// Breakpoint que ativa o comportamento de drawer (deve bater com o CSS)
+const MOBILE_BREAKPOINT = 768;
 
 export function MainLayout() {
     useWebSocket();
     const { activeView } = useNavigationStore();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const handleResize = useCallback(() => {
+        if (window.innerWidth > MOBILE_BREAKPOINT) {
+            setSidebarOpen(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, [handleResize]);
+
+    useEffect(() => {
+        if (sidebarOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [sidebarOpen]);
+
+    const toggleSidebar = () => setSidebarOpen(prev => !prev);
+    const closeSidebar = () => setSidebarOpen(false);
 
     const renderView = () => {
         switch (activeView) {
@@ -37,10 +69,15 @@ export function MainLayout() {
 
     return (
         <div className="app-shell">
-            <Sidebar />
-            <div className="main-content">
-                <Header />
-                <main className="page-content">{renderView()}</main>
+            {/* Header spans full width at the top */}
+            <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+
+            {/* Sidebar + content below header */}
+            <div className="body-shell">
+                <Sidebar open={sidebarOpen} onCloseSide={closeSidebar} />
+                <div className="main-content">
+                    <main className="page-content">{renderView()}</main>
+                </div>
             </div>
         </div>
     );
