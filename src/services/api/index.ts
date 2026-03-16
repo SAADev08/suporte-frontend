@@ -8,6 +8,8 @@ import type {
     Subtipo,
     Usuario,
     PageResponse,
+    ContatoPendente,
+    FilaAgrupadaItem,
 } from "../../types";
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -27,13 +29,25 @@ export const contatoApi = {
     atualizar: (id: string, data: Partial<Contato>) =>
         api.put<Contato>(`/api/contatos/${id}`, data),
     inativar: (id: string) => api.delete(`/api/contatos/${id}`),
+    pendentes: (page = 0, size = 20) =>
+        api.get<PageResponse<ContatoPendente>>("/api/contatos/pendentes", {
+            params: { page, size },
+        }),
 };
 
 // ─── Chamados ─────────────────────────────────────────────────────────────────
+export interface ChamadoFiltros {
+    status?: string;
+    origem?: string;
+    contatoId?: string;
+    usuarioId?: string;
+    page?: number;
+    size?: number;
+}
 export const chamadoApi = {
-    listar: (page = 0, size = 10) =>
+    listar: (filtros: ChamadoFiltros = {}) =>
         api.get<PageResponse<Chamado>>("/api/chamados", {
-            params: { page, size },
+            params: { page: 0, size: 50, ...filtros },
         }),
     buscarPorId: (id: string) => api.get<Chamado>(`/api/chamados/${id}`),
     criar: (data: Partial<Chamado>) => api.post<Chamado>("/api/chamados", data),
@@ -44,11 +58,47 @@ export const chamadoApi = {
 };
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
+export interface ChatEnviarRequest {
+    chamadoId: string;
+    texto?: string;
+    fileUrl?: string;
+    tipoMidia?: "TEXTO" | "IMAGEM" | "AUDIO" | "VIDEO";
+}
+
 export const chatApi = {
-    listarPorChamado: (chamadoId: string) =>
-        api.get<Chat[]>(`/api/chat/chamado/${chamadoId}`),
-    listarSemChamado: () => api.get<Chat[]>("/api/chat/sem-chamado"),
-    enviarMensagem: (data: Partial<Chat>) => api.post<Chat>("/api/chat", data),
+    /**
+     * Mensagens de um chamado específico, ordenadas por data de envio.
+     * GET /api/chat/chamado/:chamadoId
+     */
+    buscarPorChamado: (chamadoId: string, page = 0, size = 30) =>
+        api.get<PageResponse<Chat>>(`/api/chat/chamado/${chamadoId}`, {
+            params: { page, size, sort: "dtEnvio,asc" },
+        }),
+
+    /**
+     * Fila de triagem agrupada por contato — endpoint principal da aba Triagem.
+     * GET /api/chat/fila/agrupada
+     */
+    filaAgrupada: (page = 0, size = 20) =>
+        api.get<PageResponse<FilaAgrupadaItem>>("/api/chat/fila/agrupada", {
+            params: { page, size },
+        }),
+
+    /**
+     * Fila plana — todas as mensagens sem chamado.
+     * GET /api/chat/fila
+     */
+    fila: (page = 0, size = 30) =>
+        api.get<PageResponse<Chat>>("/api/chat/fila", {
+            params: { page, size, sort: "dtEnvio,asc" },
+        }),
+
+    /**
+     * Envia resposta do analista para um chamado.
+     * POST /api/chat/responder
+     */
+    enviar: (data: ChatEnviarRequest) =>
+        api.post<Chat>("/api/chat/responder", data),
 };
 
 // ─── Usuários ─────────────────────────────────────────────────────────────────
