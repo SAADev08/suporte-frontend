@@ -7,6 +7,8 @@ export interface Usuario {
     email: string;
     perfil: Perfil;
     ativo: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface LoginRequest {
@@ -38,7 +40,22 @@ export interface Contato {
     telefone: string;
     email?: string;
     ativo: boolean;
+    pendenteVinculacao: boolean;
     clientes?: Cliente[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+/**
+ * Retornado por GET /api/contatos/pendentes e emitido via
+ * WebSocket em /topic/contatos-pendentes.
+ * DTO enxuto — apenas o necessário para o painel de triagem.
+ */
+export interface ContatoPendente {
+    id: string;
+    nome: string;
+    telefone: string;
+    createdAt: string;
 }
 
 // ─── Chamado ──────────────────────────────────────────────────────────────────
@@ -47,25 +64,43 @@ export type ChamadoStatus =
     | "EM_ATENDIMENTO"
     | "AGUARDANDO_CLIENTE"
     | "ENCERRADO";
+
 export type Categoria = "ERRO" | "DUVIDA";
 export type Origem = "WHATSAPP" | "EMAIL" | "TELEFONE";
-export type NivelSla = "NORMAL" | "ALERTA" | "CRITICO" | "ESCALADO";
+
+// NivelSla: NÃO faz parte do Chamado — usado apenas em eventos WebSocket
+export type NivelSla = "ALERTA" | "CRITICO" | "ESCALADO";
+
+export interface ChamadoStatusHistorico {
+    id: string;
+    status: ChamadoStatus;
+    dtInicio: string;
+    dtFim?: string;
+    tempoEmStatusSegundos?: number;
+    usuarioResponsavelId?: string;
+    usuarioResponsavelNome?: string;
+}
 
 export interface Chamado {
     id: string;
-    texto: string;
-    categoria: Categoria;
+    texto?: string;
+    categoria?: Categoria;
+    solucao?: string;
     statusAtual: ChamadoStatus;
     origem: Origem;
-    nivelSla: NivelSla;
     dtAbertura: string;
     dtPrimeiraMensagem?: string;
     dtPrimeiraResposta?: string;
     dtEncerramento?: string;
-    solucao?: string;
-    contato: Contato;
-    usuarioResponsavel?: Usuario;
-    subtipo?: Subtipo;
+    tempoTotalSegundos?: number;
+    contatoId: string;
+    contatoNome: string;
+    usuarioResponsavelId?: string;
+    usuarioResponsavelNome?: string;
+    subtipoId?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    historico?: ChamadoStatusHistorico[];
 }
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
@@ -74,15 +109,53 @@ export type ChatOrigem = "CLIENTE" | "SUPORTE";
 
 export interface Chat {
     id: string;
-    idChamado?: string;
-    idContato: string;
+    chamadoId?: string;
+    contatoId: string;
+    nomeContato?: string;
+    usuarioId?: string;
     origem: ChatOrigem;
-    dtEnvio: string;
+    dtEnvio?: string;
     texto?: string;
     fileUrl?: string;
-    tipoMidia: TipoMidia;
-    foneCliente: string;
+    tipoMidia?: TipoMidia;
+    foneCliente?: string;
+    foneSuporte?: string;
+    nomeGrupo?: string;
+    createdAt?: string;
+}
+
+/**
+ * Retornado por GET /api/chat/fila/agrupada.
+ * Representa um contato com mensagens pendentes de triagem,
+ * com dados agregados calculados pelo banco (não pelo frontend).
+ */
+export interface FilaAgrupadaItem {
+    contatoId: string;
     nomeContato: string;
+    foneContato: string;
+    /**
+     * TRUE quando o contato ainda não foi vinculado a nenhum Cliente.
+     * Neste caso, o botão "Criar Chamado" deve ser bloqueado até
+     * o analista fazer a vinculação via tela de Contatos.
+     */
+    pendenteVinculacao: boolean;
+    /** Total de mensagens sem chamado deste contato. */
+    totalMensagens: number;
+    /** Data da mensagem mais antiga — base para cálculo de SLA de triagem. */
+    dtPrimeiraMensagem: string;
+    /** Data da mensagem mais recente. */
+    dtUltimaMensagem: string;
+    /** Texto da última mensagem (null para áudio sem legenda). */
+    ultimoTexto: string | null;
+    /** Tipo de mídia da última mensagem — usado para exibir ícone adequado. */
+    ultimoTipoMidia: TipoMidia | null;
+}
+
+export interface NotificacaoSla {
+    chamadoId: string;
+    nivel: NivelSla;
+    mensagem: string;
+    timestamp: string;
 }
 
 // ─── Tipo / Subtipo ───────────────────────────────────────────────────────────
@@ -109,11 +182,10 @@ export type View =
     | "usuarios"
     | "tipos";
 
-// ─── API ──────────────────────────────────────────────────────────────────────
 export interface PageResponse<T> {
     content: T[];
+    size: number;
+    number: number; // 0-indexed (Spring Boot 3)
     totalElements: number;
     totalPages: number;
-    number: number;
-    size: number;
 }
