@@ -30,7 +30,6 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
     const toggleUserMenu = () => {
         setShowUserMenu(prev => !prev);
         setShowNotif(false);
-        if (!showNotif) marcarTodasLidas();
     };
 
     const handleLogout = () => {
