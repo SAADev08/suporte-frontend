@@ -158,6 +158,20 @@ export interface NotificacaoSla {
     timestamp: string;
 }
 
+/**
+ * Payload emitido em /topic/notificacoes-triagem e retornado por
+ * GET /api/sla/triagem/ativos para contatos na fila sem resposta do suporte.
+ * Independente de NotificacaoSla — tópico e estado separados.
+ */
+export interface NotificacaoTriagemSla {
+    contatoId: string;
+    nomeContato: string;
+    /** ALERTA = 10-18 min sem resposta · ESCALADO = acima de 18 min */
+    nivel: "ALERTA" | "ESCALADO";
+    mensagem: string;
+    timestamp: string;
+}
+
 // ─── Tipo / Subtipo ───────────────────────────────────────────────────────────
 export interface Subtipo {
     id: string;
@@ -185,7 +199,26 @@ export type View =
 export interface PageResponse<T> {
     content: T[];
     size: number;
-    number: number; // 0-indexed (Spring Boot 3)
+    number: number;
     totalElements: number;
     totalPages: number;
+}
+
+/**
+ * Envelope emitido pelo backend em todos os eventos WebSocket
+ *
+ * O backend nunca envia o payload diretamente — sempre envolve em
+ * WsEnvelope para garantir rastreabilidade e deduplicação.
+ *
+ * Uso nos handlers:
+ *   const env = body as WsEnvelope<Chat>;
+ *   if (jáProcessado(env.eventId)) return;
+ *   handleNovaMensagem(env.payload);
+ */
+export interface WsEnvelope<T> {
+    /** UUID gerado no momento da emissão — único por evento. */
+    eventId: string;
+    serverTimestamp: number;
+    /** Payload original sem modificação. */
+    payload: T;
 }
