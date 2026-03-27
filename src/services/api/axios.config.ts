@@ -1,4 +1,5 @@
 import axios from "axios";
+import { wsService } from "../websocket";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const TOKEN_KEY_ENV = import.meta.env.VITE_TOKEN_KEY;
@@ -18,6 +19,8 @@ api.interceptors.response.use(
     res => res,
     error => {
         if (error.response?.status === 401) {
+            wsService.disconnect();
+
             localStorage.clear();
             window.location.reload();
         }

@@ -1,5 +1,5 @@
 import api from "./axios.config";
-import type { Contato, PageResponse } from "../../types";
+import type { Contato, ContatoPendente, PageResponse } from "../../types";
 
 export interface ContatoRequest {
     nome: string;
@@ -30,4 +30,9 @@ export const contactApi = {
         api.put<Contato>(`/api/contatos/${id}`, data),
 
     inativar: (id: string) => api.patch(`/api/contatos/${id}/inativar`),
+
+    pendentes: (page = 0, size = 20) =>
+        api.get<PageResponse<ContatoPendente>>("/api/contatos/pendentes", {
+            params: { page, size },
+        }),
 };

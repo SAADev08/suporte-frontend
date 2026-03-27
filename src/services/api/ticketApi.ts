@@ -23,6 +23,12 @@ export interface ChamadoRequest {
     contatoId: string;
     usuarioResponsavelId?: string;
     subtipoId?: string;
+    /**
+     * IDs das mensagens da triagem a serem vinculadas ao chamado no momento
+     * da criação. Quando informado, o backend associa cada chat ao chamado
+     * recém-criado (id_chamado preenchido), removendo-as da fila de triagem.
+     */
+    chatIds?: string[];
 }
 
 export interface EncerrarRequest {
