@@ -1,70 +1,129 @@
-import { useCallback, useEffect } from "react";
-import { wsService } from "../services/websocket";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { wsService, BoundedEventCache } from "../services/websocket";
 import { useNotificacaoStore } from "../store/notificationStore";
 import { useAuthStore } from "../store/authStore";
-import type { ContatoPendente } from "../types";
-import { contatoApi } from "../services/api";
+import type { ContatoPendente, WsEnvelope } from "../types";
+import { contactApi } from "../services/api/contactApi";
+
+export type WsStatus = "connected" | "connecting" | "disconnected";
 
 export function useWebSocket() {
-    const { token, isAuthenticated } = useAuthStore();
+    const { token, isAuthenticated, logout } = useAuthStore();
     const { adicionar, adicionarContatoPendente, setContatosPendentes } =
         useNotificacaoStore();
 
+    const [wsStatus, setWsStatus] = useState<WsStatus>("disconnected");
+
+    // Ref espelha o estado para leitura síncrona sem dependência do closure
+    const wsStatusRef = useRef<WsStatus>("disconnected");
+
+    const updateStatus = useCallback((next: WsStatus) => {
+        if (wsStatusRef.current === next) return; // sem re-render se igual
+        wsStatusRef.current = next;
+        setWsStatus(next);
+    }, []);
+
+    const eventCache = useRef(new BoundedEventCache());
+
     const carregarPendentesIniciais = useCallback(async () => {
         try {
-            const { data } = await contatoApi.pendentes(0, 50);
+            const { data } = await contactApi.pendentes(0, 50);
             setContatosPendentes(data.content);
         } catch {
-            // Falha silenciosa — o WebSocket continua entregando novos eventos.
             console.warn(
                 "[WS] Não foi possível carregar contatos pendentes iniciais.",
             );
         }
     }, [setContatosPendentes]);
 
-    useEffect(() => {
-        if (!isAuthenticated || !token) return;
+    // Callbacks passados ao wsService — chamados assincronamente pelo STOMP
+    const onConnected = useCallback(async () => {
+        updateStatus("connected");
+        await carregarPendentesIniciais();
+        eventCache.current.clear();
+    }, [updateStatus, carregarPendentesIniciais]);
 
-        if (!wsService.isConnected()) {
-            wsService.connect(token, () => {
-                // Ao conectar (ou reconectar), carrega a lista completa de
-                // pendentes via REST — o WebSocket só entrega novos eventos
-                // a partir deste momento, não o histórico anterior.
-                carregarPendentesIniciais();
-            });
-        } else {
-            // Já conectado (ex: hot-reload em dev) — carrega mesmo assim
-            carregarPendentesIniciais();
+    const onAuthError = useCallback(() => {
+        console.warn("[WS] Token expirado — logout.");
+        updateStatus("disconnected");
+        logout();
+    }, [updateStatus, logout]);
+
+    useEffect(() => {
+        if (!isAuthenticated || !token) {
+            wsService.disconnect();
+            return;
         }
 
-        wsService.subscribe("/topic/notificacoes", (body: unknown) => {
-            const data = body as { mensagem?: string; nivel?: string };
+        const getToken = () => useAuthStore.getState().token;
+        wsService.connect(getToken, onConnected, onAuthError);
+
+        // Quando o STOMP detecta desconexão, transita para "connecting" se
+        // estava conectado (reconexão automática em andamento) ou mantém o estado atual.
+        wsService.onDisconnected = () => {
+            updateStatus(
+                wsStatusRef.current === "connected" ? "connecting" : wsStatusRef.current,
+            );
+        };
+
+        // Subscriptions
+        const handleNotif = (body: unknown) => {
+            const env = body as WsEnvelope<{
+                mensagem?: string;
+                nivel?: string;
+            }>;
+            if (eventCache.current.markAndCheck(env.eventId)) return;
+
+            const data = env.payload;
+            const tipoMap: Record<
+                string,
+                "alerta" | "critico" | "escalado" | "info"
+            > = {
+                ALERTA: "alerta",
+                CRITICO: "critico",
+                ESCALADO: "escalado",
+            };
             adicionar({
-                tipo: (data.nivel?.toLowerCase() as "alerta") || "info",
+                tipo: tipoMap[data.nivel ?? ""] ?? "info",
                 mensagem: data.mensagem || "Nova notificação recebida",
             });
-        });
+        };
 
-        wsService.subscribe("/topic/sla", (body: unknown) => {
-            const data = body as { mensagem?: string; nivel?: string };
-            adicionar({
-                tipo:
-                    data.nivel === "CRITICO"
-                        ? "critico"
-                        : data.nivel === "ESCALADO"
-                          ? "escalado"
-                          : "alerta",
-                mensagem: data.mensagem || "Alerta de SLA",
-            });
-        });
+        const handleContact = (body: unknown) => {
+            const env = body as WsEnvelope<ContatoPendente>;
+            if (eventCache.current.markAndCheck(env.eventId)) return;
 
-        wsService.subscribe("/topic/contatos-pendentes", (body: unknown) => {
-            const contato = body as ContatoPendente;
+            const contato = env.payload;
             adicionarContatoPendente(contato);
             adicionar({
                 tipo: "alerta",
                 mensagem: `Novo contato sem vínculo: ${contato.nome} (${contato.telefone})`,
             });
-        });
-    }, [isAuthenticated, token]);
+        };
+
+        const cleanupNotifications = wsService.subscribe(
+            "/topic/notificacoes",
+            handleNotif,
+        );
+        const cleanupContacts = wsService.subscribe(
+            "/topic/contatos-pendentes",
+            handleContact,
+        );
+
+        return () => {
+            wsService.onDisconnected = null;
+            cleanupNotifications();
+            cleanupContacts();
+        };
+    }, [
+        isAuthenticated,
+        token,
+        onConnected,
+        onAuthError,
+        updateStatus,
+        adicionar,
+        adicionarContatoPendente,
+    ]);
+
+    return { wsStatus };
 }
