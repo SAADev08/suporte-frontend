@@ -155,3 +155,311 @@
         width: 100%;
     }
 }
+
+/* ─── Timeline Drawer ────────────────────────────────────────────────────────*/
+.timeline-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 50;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.timeline-panel {
+    width: min(640px, 100vw);
+    height: 100%;
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+    animation: slideInRight 0.2s ease-out;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(40px); opacity: 0; }
+    to   { transform: translateX(0);   opacity: 1; }
+}
+
+/* Header */
+.timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.timeline-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--brand-mid);
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.timeline-header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.timeline-header-info strong {
+    font-size: 15px;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timeline-header-info span {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+/* Sub-header */
+.timeline-subheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    font-size: 12px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.timeline-subheader-rt {
+    font-size: 11px;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Messages area */
+.timeline-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.timeline-loading,
+.timeline-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 200px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.timeline-vazio span {
+    font-size: 30px;
+}
+
+/* Load older */
+.timeline-load-older {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0 14px;
+}
+
+.timeline-load-older button {
+    font-size: 12px;
+    color: var(--brand-mid);
+    background: var(--brand-bg);
+    border: 1px solid var(--color-border);
+    padding: 5px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.timeline-load-older button:hover:not(:disabled) {
+    background: rgba(26, 107, 60, 0.14);
+}
+
+.timeline-load-older button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+/* ── Ticket markers ──────────────────────────────────────────────────────────*/
+.timeline-marker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.timeline-marker::before,
+.timeline-marker::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.timeline-marker-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    white-space: nowrap;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    font-weight: 500;
+    font-size: 11.5px;
+}
+
+.timeline-marker-open .timeline-marker-content {
+    background: rgba(26, 107, 60, 0.07);
+    border-color: rgba(26, 107, 60, 0.28);
+    color: #1a6b3c;
+}
+
+.timeline-marker-close .timeline-marker-content {
+    background: rgba(107, 114, 128, 0.07);
+    border-color: rgba(107, 114, 128, 0.25);
+    color: var(--color-text-muted);
+}
+
+.timeline-marker-ts {
+    font-size: 10.5px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+/* ── Date separator ──────────────────────────────────────────────────────────*/
+.timeline-sep-data {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 6px;
+    color: var(--color-text-muted);
+    font-size: 11.5px;
+}
+
+.timeline-sep-data::before,
+.timeline-sep-data::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+/* ── Message bubbles ─────────────────────────────────────────────────────────*/
+.timeline-msg {
+    display: flex;
+    gap: 8px;
+    margin: 1px 0;
+}
+
+.timeline-msg-cliente {
+    flex-direction: row;
+    align-self: flex-start;
+    max-width: 82%;
+}
+
+.timeline-msg-suporte {
+    flex-direction: row-reverse;
+    align-self: flex-end;
+    max-width: 82%;
+}
+
+.timeline-msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--brand-mid);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.timeline-msg-balao {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 7px 11px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.timeline-msg-cliente .timeline-msg-balao {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top-left-radius: 4px;
+}
+
+.timeline-msg-suporte .timeline-msg-balao {
+    background: var(--brand-mid);
+    color: #fff;
+    border-top-right-radius: 4px;
+}
+
+.timeline-msg-remetente {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-mid);
+    margin-bottom: 1px;
+}
+
+.timeline-msg-texto {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.timeline-msg-hora {
+    font-size: 10.5px;
+    color: var(--color-text-muted);
+    align-self: flex-end;
+    margin-top: 1px;
+}
+
+.timeline-msg-suporte .timeline-msg-hora {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.timeline-msg-imagem {
+    max-width: 220px;
+    border-radius: 8px;
+}
+
+.timeline-msg-audio {
+    max-width: 240px;
+    height: 36px;
+}
+
+@media (max-width: 640px) {
+    .timeline-panel {
+        width: 100vw;
+    }
+}

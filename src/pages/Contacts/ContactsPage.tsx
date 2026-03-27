@@ -6,6 +6,8 @@ import { clienteApi } from "../../services/api/clientApi";
 import { formatarData, formatarTelefone } from "../../utils/formatters";
 import "./contacts.css";
 import { Pagination, type TamanhoPagina } from "../../components/Pagination";
+import { useNotificacaoStore } from "../../store/notificationStore";
+import { ContactTimeline } from "./ContactTimeline";
 
 function apenasNumeros(v: string) {
     return v.replace(/\D/g, "");
@@ -42,6 +44,13 @@ export function ContactsPage() {
     const [clienteBusca, setClienteBusca] = useState("");
     const [page, setPage] = useState(0);
     const [size, setSize] = useState<TamanhoPagina>(10);
+    const [timelineContato, setTimelineContato] = useState<{
+        id: string;
+        nome: string;
+        telefone: string;
+    } | null>(null);
+
+    const { removerContatoPendente } = useNotificacaoStore.getState();
 
     // ─── Carregar clientes para o select ──────────────────────────────────────
     useEffect(() => {
@@ -103,6 +112,7 @@ export function ContactsPage() {
     };
 
     const abrirEditar = (c: Contato) => {
+        console.log(c);
         setForm({
             nome: c.nome,
             telefone: formatarTelefone(c.telefone),
@@ -138,8 +148,13 @@ export function ContactsPage() {
                 await contactApi.criar(payload);
                 toast.success("Contato cadastrado com sucesso!");
             } else if (modal === "editar" && selecionado) {
+                console.log(selecionado);
                 await contactApi.atualizar(selecionado.id, payload);
                 toast.success("Contato atualizado com sucesso!");
+
+                if (selecionado.pendenteVinculacao) {
+                    removerContatoPendente(selecionado.id);
+                }
             }
             setModal(null);
             carregar();
@@ -337,6 +352,19 @@ export function ContactsPage() {
                                         </td>
                                         <td>
                                             <div className="acoes-tabela">
+                                                <button
+                                                    className="btn-acao"
+                                                    onClick={() =>
+                                                        setTimelineContato({
+                                                            id: c.id,
+                                                            nome: c.nome,
+                                                            telefone: c.telefone,
+                                                        })
+                                                    }
+                                                    title="Ver conversa"
+                                                >
+                                                    💬
+                                                </button>
                                                 <button
                                                     className="btn-acao btn-acao-editar"
                                                     onClick={() =>
@@ -714,6 +742,16 @@ export function ContactsPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Timeline de conversa por contato */}
+            {timelineContato && (
+                <ContactTimeline
+                    contatoId={timelineContato.id}
+                    contatoNome={timelineContato.nome}
+                    foneContato={formatarTelefone(timelineContato.telefone)}
+                    onClose={() => setTimelineContato(null)}
+                />
             )}
 
             {/* Modal Confirmar Inativação */}
