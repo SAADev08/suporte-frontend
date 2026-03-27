@@ -81,3 +81,26 @@ export function formatarTelefone(valor: string): string {
         .replace(/(\d{2})(\d)/, "($1) $2")
         .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 }
+
+// ─── Helpers TriagemConversaPanel e ContactTimeline ─────────────────────────────────────────────────────────────────
+export function formatHora(iso?: string | null): string {
+    if (!iso) return "";
+    return new Date(iso).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
+export function formatDataCurta(ts: number): string {
+    const d = new Date(ts);
+    const hoje = new Date();
+    const ontem = new Date(hoje);
+    ontem.setDate(ontem.getDate() - 1);
+    if (d.toDateString() === hoje.toDateString()) return "Hoje";
+    if (d.toDateString() === ontem.toDateString()) return "Ontem";
+    return d.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+    });
+}
